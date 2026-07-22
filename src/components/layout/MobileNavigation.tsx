@@ -1,52 +1,88 @@
 "use client"
 
-import { useState } from "react"
+import * as React from "react"
 import Link from "next/link"
-import { Home, Menu, PieChart, Settings, X } from "lucide-react"
+import { usePathname } from "next/navigation"
+import { Menu, LayoutDashboard, Wallet, CreditCard, ArrowRightLeft, Target, PieChart, Sparkles, Settings, PiggyBank } from "lucide-react"
+
 import { Button } from "@/components/ui/button"
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet"
+import { FamilySwitcher } from "./FamilySwitcher"
+
+const navItems = [
+  { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+  { name: "Contas", href: "/dashboard/accounts", icon: Wallet },
+  { name: "Cartões", href: "/dashboard/cards", icon: CreditCard },
+  { name: "Transações", href: "/dashboard/transactions", icon: ArrowRightLeft },
+  { name: "Orçamentos", href: "/dashboard/budgets", icon: PiggyBank },
+  { name: "Metas", href: "/dashboard/goals", icon: Target },
+  { name: "Relatórios", href: "/dashboard/reports", icon: PieChart },
+  { name: "AI Assistant", href: "/dashboard/assistant", icon: Sparkles },
+]
 
 export function MobileNavigation() {
-  const [isOpen, setIsOpen] = useState(false)
+  const [open, setOpen] = React.useState(false)
+  const pathname = usePathname()
 
-  const toggle = () => setIsOpen(!isOpen)
-  const close = () => setIsOpen(false)
+  // Close sheet when route changes
+  React.useEffect(() => {
+    setOpen(false)
+  }, [pathname])
 
   return (
-    <div className="md:hidden">
-      <Button variant="ghost" size="icon" onClick={toggle} aria-label="Abrir menu">
-        <Menu className="h-6 w-6" />
-      </Button>
+    <Sheet open={open} onOpenChange={setOpen}>
+      <SheetTrigger asChild>
+        <Button variant="ghost" size="icon" className="md:hidden shrink-0">
+          <Menu className="h-5 w-5" />
+          <span className="sr-only">Toggle navigation menu</span>
+        </Button>
+      </SheetTrigger>
+      <SheetContent side="left" className="w-72 p-0 flex flex-col">
+        <SheetHeader className="h-16 flex items-center justify-center border-b px-4 text-left">
+          <SheetTitle className="sr-only">Menu de Navegação</SheetTitle>
+          <FamilySwitcher />
+        </SheetHeader>
+        
+        <nav className="flex-1 space-y-1 p-3 overflow-y-auto">
+          {navItems.map((item) => {
+            const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`)
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors ${
+                  isActive 
+                    ? "bg-primary/10 text-primary" 
+                    : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                }`}
+              >
+                <item.icon className="h-4 w-4" />
+                {item.name}
+              </Link>
+            )
+          })}
+        </nav>
 
-      {isOpen && (
-        <div className="fixed inset-0 z-50 flex bg-background/80 backdrop-blur-sm">
-          <aside className="w-64 bg-card h-full flex flex-col p-4 shadow-xl border-r">
-            <div className="flex items-center justify-between h-14 px-2">
-              <span className="font-bold text-xl">Atlas Financeiro</span>
-              <Button variant="ghost" size="icon" onClick={close}>
-                <X className="h-5 w-5" />
-              </Button>
-            </div>
-            
-            <nav className="flex-1 space-y-2 mt-4">
-              <Link href="/dashboard" onClick={close} className="flex items-center gap-3 rounded-lg px-4 py-3 text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors">
-                <Home className="h-5 w-5" />
-                Dashboard
-              </Link>
-              <Link href="/dashboard/reports" onClick={close} className="flex items-center gap-3 rounded-lg px-4 py-3 text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors">
-                <PieChart className="h-5 w-5" />
-                Relatórios
-              </Link>
-            </nav>
-            <div className="mt-auto pt-4 border-t">
-              <Link href="/dashboard/settings" onClick={close} className="flex items-center gap-3 rounded-lg px-4 py-3 text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors">
-                <Settings className="h-5 w-5" />
-                Configurações
-              </Link>
-            </div>
-          </aside>
-          <div className="flex-1" onClick={close} />
+        <div className="p-3 border-t">
+          <Link
+            href="/dashboard/settings"
+            className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors ${
+              pathname.startsWith("/dashboard/settings")
+                ? "bg-primary/10 text-primary" 
+                : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+            }`}
+          >
+            <Settings className="h-4 w-4" />
+            Configurações
+          </Link>
         </div>
-      )}
-    </div>
+      </SheetContent>
+    </Sheet>
   )
 }
