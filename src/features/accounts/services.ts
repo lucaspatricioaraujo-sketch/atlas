@@ -1,7 +1,6 @@
 import { supabase } from "@/services/auth.service"
-import type { Account, AccountFormData } from "./types" // Wait, I used AccountFormData in schemas.ts, I should import it from there.
-
-import type { AccountFormData as SchemaAccountFormData } from "./schemas"
+import type { Account } from "./types"
+import type { AccountFormData } from "./schemas"
 
 export const AccountService = {
   async getAccounts(familyId: string): Promise<Account[]> {
@@ -27,7 +26,7 @@ export const AccountService = {
     return data as Account | null
   },
 
-  async createAccount(familyId: string, payload: SchemaAccountFormData): Promise<Account> {
+  async createAccount(familyId: string, payload: AccountFormData): Promise<Account> {
     const { data, error } = await supabase
       .from("accounts")
       .insert([
@@ -44,7 +43,7 @@ export const AccountService = {
     return data as Account
   },
 
-  async updateAccount(id: string, payload: Partial<SchemaAccountFormData>): Promise<Account> {
+  async updateAccount(id: string, payload: Partial<AccountFormData>): Promise<Account> {
     const { data, error } = await supabase
       .from("accounts")
       .update(payload)

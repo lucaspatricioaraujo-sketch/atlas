@@ -5,7 +5,6 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { Menu, LayoutDashboard, Wallet, CreditCard, ArrowRightLeft, Target, PieChart, Sparkles, Settings, PiggyBank } from "lucide-react"
 
-import { Button } from "@/components/ui/button"
 import {
   Sheet,
   SheetContent,
@@ -37,11 +36,9 @@ export function MobileNavigation() {
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
-      <SheetTrigger asChild>
-        <Button variant="ghost" size="icon" className="md:hidden shrink-0">
+      <SheetTrigger className="md:hidden shrink-0 inline-flex items-center justify-center size-8 rounded-lg hover:bg-muted transition-colors outline-none">
           <Menu className="h-5 w-5" />
           <span className="sr-only">Toggle navigation menu</span>
-        </Button>
       </SheetTrigger>
       <SheetContent side="left" className="w-72 p-0 flex flex-col">
         <SheetHeader className="h-16 flex items-center justify-center border-b px-4 text-left">

@@ -15,8 +15,8 @@ import { Spinner } from "@/components/ui/spinner"
 // Notice: Real application would update user profile via Supabase or backend endpoint
 
 const onboardingSchema = z.object({
-  currency: z.string().min(3).default("BRL"),
-  timezone: z.string().default("America/Sao_Paulo"),
+  currency: z.string().min(1),
+  timezone: z.string().min(1),
   firstGoalName: z.string().optional(),
   firstGoalAmount: z.string().optional(),
 })

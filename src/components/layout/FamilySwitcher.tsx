@@ -11,7 +11,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Button } from "@/components/ui/button"
 
 export function FamilySwitcher() {
   // In the future, fetch current family and roles from global state or context
@@ -19,17 +18,15 @@ export function FamilySwitcher() {
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="w-full justify-start gap-2 px-2 hover:bg-accent/50">
-          <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary/10 text-primary">
-            <Building2 className="h-4 w-4" />
-          </div>
-          <div className="flex flex-col items-start text-sm leading-none flex-1 overflow-hidden">
-            <span className="font-semibold truncate w-full text-left">{activeFamily.name}</span>
-            <span className="text-xs text-muted-foreground">{activeFamily.role}</span>
-          </div>
-          <ChevronsUpDown className="ml-auto h-4 w-4 shrink-0 opacity-50" />
-        </Button>
+      <DropdownMenuTrigger className="w-full flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-accent/50 transition-colors outline-none">
+        <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary/10 text-primary shrink-0">
+          <Building2 className="h-4 w-4" />
+        </div>
+        <div className="flex flex-col items-start text-sm leading-none flex-1 overflow-hidden">
+          <span className="font-semibold truncate w-full text-left">{activeFamily.name}</span>
+          <span className="text-xs text-muted-foreground">{activeFamily.role}</span>
+        </div>
+        <ChevronsUpDown className="ml-auto h-4 w-4 shrink-0 opacity-50" />
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56" align="start" alignOffset={-4}>
         <DropdownMenuLabel className="text-xs text-muted-foreground uppercase">
@@ -37,7 +34,7 @@ export function FamilySwitcher() {
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem className="gap-2">
-          <div className="flex h-6 w-6 items-center justify-center rounded-sm bg-primary text-primary-foreground">
+          <div className="flex h-6 w-6 items-center justify-center rounded-sm bg-primary text-primary-foreground shrink-0">
             <Building2 className="h-3 w-3" />
           </div>
           <span className="font-medium">{activeFamily.name}</span>

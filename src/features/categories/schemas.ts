@@ -5,7 +5,7 @@ export const categorySchema = z.object({
   icon: z.string().nullable().optional(),
   color: z.string().nullable().optional(),
   type: z.enum(["INCOME", "EXPENSE"], {
-    required_error: "O tipo da categoria é obrigatório",
+    message: "O tipo da categoria é obrigatório",
   }),
   parent_category_id: z.string().uuid().nullable().optional(),
 })
