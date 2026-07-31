@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Spinner } from "@/components/ui/spinner"
-import { supabase } from "@/services/auth.service"
+import { useSupabase } from "@/providers/supabase-provider"
 
 const createFamilySchema = z.object({
   name: z.string().min(3, "O nome deve ter pelo menos 3 caracteres").max(50),
@@ -23,6 +23,7 @@ type CreateFamilyForm = z.infer<typeof createFamilySchema>
 
 export default function CreateFamilyPage() {
   const router = useRouter()
+  const { supabase, user, refreshFamilyId } = useSupabase()
   const [isLoading, setIsLoading] = useState(false)
 
   const { register, handleSubmit, formState: { errors } } = useForm<CreateFamilyForm>({
@@ -32,11 +33,9 @@ export default function CreateFamilyPage() {
   const onSubmit = async (data: CreateFamilyForm) => {
     setIsLoading(true)
     try {
-      // Get current user
-      const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error("Usuário não autenticado")
 
-      // Insert family
+      // 1. Insert family
       const { data: family, error: familyError } = await supabase
         .from("families")
         .insert([{ name: data.name }])
@@ -44,8 +43,9 @@ export default function CreateFamilyPage() {
         .single()
 
       if (familyError) throw familyError
+      if (!family?.id) throw new Error("Família criada sem ID.")
 
-      // Link user to family as OWNER
+      // 2. Link user to family as OWNER
       const { error: memberError } = await supabase
         .from("family_members")
         .insert([{
@@ -56,9 +56,12 @@ export default function CreateFamilyPage() {
 
       if (memberError) throw memberError
 
+      // 3. Refresh the context so familyId is available immediately
+      await refreshFamilyId()
+
       toast.success("Família criada com sucesso!")
       router.push("/onboarding")
-      
+
     } catch (err: any) {
       toast.error("Erro ao criar família", { description: err.message })
     } finally {

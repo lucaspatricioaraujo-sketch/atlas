@@ -1,21 +1,37 @@
 import { createBrowserClient } from "@supabase/ssr"
+import type { SupabaseClient } from "@supabase/supabase-js"
 
-// A reusable client for services if needed outside of components
-export const supabase = createBrowserClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-)
+// Singleton — shared with SupabaseProvider to ensure the same session/cookies
+// are used across all service calls and React context updates.
+let _supabaseClient: SupabaseClient | null = null
+
+export function getSupabaseClient(): SupabaseClient {
+  if (!_supabaseClient) {
+    _supabaseClient = createBrowserClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    )
+  }
+  return _supabaseClient
+}
+
+// Named export for backwards compatibility with all existing service imports
+export const supabase = new Proxy({} as SupabaseClient, {
+  get(_target, prop) {
+    return (getSupabaseClient() as any)[prop]
+  },
+})
 
 export const AuthService = {
   async signOut() {
-    return await supabase.auth.signOut()
+    return await getSupabaseClient().auth.signOut()
   },
-  
+
   async getSession() {
-    return await supabase.auth.getSession()
+    return await getSupabaseClient().auth.getSession()
   },
 
   async getUser() {
-    return await supabase.auth.getUser()
-  }
+    return await getSupabaseClient().auth.getUser()
+  },
 }

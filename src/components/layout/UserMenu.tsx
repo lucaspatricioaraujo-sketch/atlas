@@ -14,7 +14,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { supabase } from "@/services/auth.service"
 import { toast } from "sonner"
 
 import { useSupabase } from "@/providers/supabase-provider"
