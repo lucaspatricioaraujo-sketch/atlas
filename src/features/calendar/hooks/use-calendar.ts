@@ -7,8 +7,7 @@ export const CALENDAR_EVENTS_QUERY_KEY = "calendar_events"
 export const CALENDAR_INSIGHTS_QUERY_KEY = "calendar_insights"
 
 export function useCalendarEvents(currentDate: Date) {
-  const { user } = useSupabase()
-  const familyId = user?.id
+  const { familyId } = useSupabase()
   
   // Obter o primeiro e último dia do mês ativo
   const start = format(startOfMonth(currentDate), "yyyy-MM-dd")
@@ -22,8 +21,7 @@ export function useCalendarEvents(currentDate: Date) {
 }
 
 export function useMonthlyInsights(currentDate: Date) {
-  const { user } = useSupabase()
-  const familyId = user?.id
+  const { familyId } = useSupabase()
   
   const year = currentDate.getFullYear()
   const month = currentDate.getMonth() + 1

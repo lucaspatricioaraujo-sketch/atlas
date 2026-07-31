@@ -10,8 +10,7 @@ export const REPORTS_CASHFLOW_KEY = "reports_cashflow_chart"
 export const REPORTS_CATEGORY_KEY = "reports_category_chart"
 
 export function useReportsSummary(filters: ReportsFilterState) {
-  const { user } = useSupabase()
-  const familyId = user?.id
+  const { familyId } = useSupabase()
 
   return useQuery({
     queryKey: [REPORTS_SUMMARY_KEY, familyId, filters],
@@ -21,8 +20,7 @@ export function useReportsSummary(filters: ReportsFilterState) {
 }
 
 export function useSmartInsights(filters: ReportsFilterState) {
-  const { user } = useSupabase()
-  const familyId = user?.id
+  const { familyId } = useSupabase()
 
   return useQuery({
     queryKey: [REPORTS_INSIGHTS_KEY, familyId, filters],
@@ -32,8 +30,7 @@ export function useSmartInsights(filters: ReportsFilterState) {
 }
 
 export function useCashFlowChart(filters: ReportsFilterState) {
-  const { user } = useSupabase()
-  const familyId = user?.id
+  const { familyId } = useSupabase()
 
   return useQuery({
     queryKey: [REPORTS_CASHFLOW_KEY, familyId, filters],
@@ -43,8 +40,7 @@ export function useCashFlowChart(filters: ReportsFilterState) {
 }
 
 export function useExpensesByCategory(filters: ReportsFilterState) {
-  const { user } = useSupabase()
-  const familyId = user?.id
+  const { familyId } = useSupabase()
 
   return useQuery({
     queryKey: [REPORTS_CATEGORY_KEY, familyId, filters],

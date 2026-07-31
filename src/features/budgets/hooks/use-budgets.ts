@@ -7,8 +7,7 @@ export const BUDGETS_QUERY_KEY = "budgets"
 export const BUDGET_USAGE_KEY = "budget_usage"
 
 export function useBudgets() {
-  const { user } = useSupabase()
-  const familyId = user?.id
+  const { familyId } = useSupabase()
 
   return useQuery({
     queryKey: [BUDGETS_QUERY_KEY, familyId],
@@ -26,8 +25,7 @@ export function useBudget(id: string) {
 }
 
 export function useBudgetUsage(budgetId: string) {
-  const { user } = useSupabase()
-  const familyId = user?.id
+  const { familyId } = useSupabase()
 
   return useQuery({
     queryKey: [BUDGET_USAGE_KEY, budgetId, familyId],
@@ -38,8 +36,7 @@ export function useBudgetUsage(budgetId: string) {
 
 export function useCreateBudget() {
   const queryClient = useQueryClient()
-  const { user } = useSupabase()
-  const familyId = user?.id
+  const { familyId } = useSupabase()
 
   return useMutation({
     mutationFn: (data: BudgetFormData) => {
@@ -54,8 +51,7 @@ export function useCreateBudget() {
 
 export function useDeleteBudget() {
   const queryClient = useQueryClient()
-  const { user } = useSupabase()
-  const familyId = user?.id
+  const { familyId } = useSupabase()
 
   return useMutation({
     mutationFn: (id: string) => BudgetService.deleteBudget(id),

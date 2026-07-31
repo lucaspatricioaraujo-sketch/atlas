@@ -4,8 +4,7 @@ import { AccountService } from "../services"
 import type { AccountFormData } from "../schemas"
 
 export function useAccounts() {
-  const { user } = useSupabase()
-  const familyId = user?.id
+  const { familyId } = useSupabase()
 
   return useQuery({
     queryKey: ["accounts", familyId],
@@ -27,8 +26,7 @@ export function useAccount(id: string) {
 
 export function useCreateAccount() {
   const queryClient = useQueryClient()
-  const { user } = useSupabase()
-  const familyId = user?.id
+  const { familyId } = useSupabase()
 
   return useMutation({
     mutationFn: (data: AccountFormData) => {

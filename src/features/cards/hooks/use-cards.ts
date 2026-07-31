@@ -6,8 +6,7 @@ import { useSupabase } from "@/providers/supabase-provider"
 export const CARDS_QUERY_KEY = "cards"
 
 export function useCards() {
-  const { user } = useSupabase()
-  const familyId = user?.id
+  const { familyId } = useSupabase()
   return useQuery({
     queryKey: [CARDS_QUERY_KEY, familyId],
     queryFn: () => CardService.getCards(familyId!),
@@ -25,8 +24,7 @@ export function useCard(id: string) {
 
 export function useCreateCard() {
   const queryClient = useQueryClient()
-  const { user } = useSupabase()
-  const familyId = user?.id
+  const { familyId } = useSupabase()
 
   return useMutation({
     mutationFn: (data: CardFormData) => CardService.createCard(familyId!, data),
@@ -38,8 +36,7 @@ export function useCreateCard() {
 
 export function useUpdateCard(id: string) {
   const queryClient = useQueryClient()
-  const { user } = useSupabase()
-  const familyId = user?.id
+  const { familyId } = useSupabase()
 
   return useMutation({
     mutationFn: (data: Partial<CardFormData>) => CardService.updateCard(id, data),
@@ -52,8 +49,7 @@ export function useUpdateCard(id: string) {
 
 export function useArchiveCard() {
   const queryClient = useQueryClient()
-  const { user } = useSupabase()
-  const familyId = user?.id
+  const { familyId } = useSupabase()
 
   return useMutation({
     mutationFn: (id: string) => CardService.archiveCard(id),
@@ -65,8 +61,7 @@ export function useArchiveCard() {
 
 export function useToggleFavorite() {
   const queryClient = useQueryClient()
-  const { user } = useSupabase()
-  const familyId = user?.id
+  const { familyId } = useSupabase()
 
   return useMutation({
     mutationFn: ({ id, isFavorite }: { id: string, isFavorite: boolean }) => 
@@ -92,8 +87,7 @@ export function useToggleFavorite() {
 
 export function useToggleActive() {
   const queryClient = useQueryClient()
-  const { user } = useSupabase()
-  const familyId = user?.id
+  const { familyId } = useSupabase()
 
   return useMutation({
     mutationFn: ({ id, isActive }: { id: string, isActive: boolean }) => 

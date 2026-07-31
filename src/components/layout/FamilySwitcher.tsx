@@ -12,9 +12,28 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 
+import { useSupabase } from "@/providers/supabase-provider"
+
 export function FamilySwitcher() {
-  // In the future, fetch current family and roles from global state or context
-  const activeFamily = { name: "Família Silva", role: "OWNER" }
+  const { user, supabase } = useSupabase()
+  const [activeFamily, setActiveFamily] = React.useState({ name: "Atlas Financeiro", role: "Membro" })
+
+  React.useEffect(() => {
+    if (!user) return
+    supabase
+      .from("family_members")
+      .select("role, families(name)")
+      .eq("user_id", user.id)
+      .limit(1)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (data) {
+          const name = (data as any).families?.name || "Espaço Familiar"
+          const role = data.role === "OWNER" ? "Proprietário" : data.role === "ADMIN" ? "Administrador" : "Membro"
+          setActiveFamily({ name, role })
+        }
+      })
+  }, [user, supabase])
 
   return (
     <DropdownMenu>
@@ -40,7 +59,10 @@ export function FamilySwitcher() {
           <span className="font-medium">{activeFamily.name}</span>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem className="text-muted-foreground">
+        <DropdownMenuItem 
+          className="text-muted-foreground cursor-pointer"
+          onClick={() => window.location.href = "/create-family"}
+        >
           Criar nova Família...
         </DropdownMenuItem>
       </DropdownMenuContent>

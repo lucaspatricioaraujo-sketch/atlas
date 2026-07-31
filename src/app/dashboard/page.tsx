@@ -18,6 +18,7 @@ import {
 import { AnalyticsService } from "@/features/analytics/services"
 import { formatCurrency } from "@/utils/format"
 import { supabase } from "@/services/auth.service"
+import { useSupabase } from "@/providers/supabase-provider"
 
 import type { DashboardSummaryDTO, UpcomingBillDTO, ExpenseByCategoryDTO, CashFlowChartDTO } from "@/features/analytics/types"
 
@@ -41,10 +42,17 @@ function getMonthRange() {
 
 export default function DashboardPage() {
   const { startDate, endDate } = getMonthRange()
+  const { familyId: contextFamilyId, user } = useSupabase()
 
   // State Management
-  const [familyId, setFamilyId] = useState<string | null>(null)
+  const [familyId, setFamilyId] = useState<string | null>(contextFamilyId)
   const [familyName, setFamilyName] = useState("Família")
+
+  useEffect(() => {
+    if (contextFamilyId) {
+      setFamilyId(contextFamilyId)
+    }
+  }, [contextFamilyId])
 
   // Data States
   const [summary, setSummary] = useState<DashboardSummaryDTO | null>(null)
@@ -75,20 +83,20 @@ export default function DashboardPage() {
   // ── Bootstrap: find user's family ──
   useEffect(() => {
     async function bootstrap() {
+      if (!user) return
       try {
-        const { data: { user } } = await supabase.auth.getUser()
-        if (!user) return
-
         const { data: membership } = await supabase
           .from("family_members")
           .select("family_id, families(name)")
           .eq("user_id", user.id)
           .limit(1)
-          .single()
+          .maybeSingle()
 
         if (membership) {
           setFamilyId(membership.family_id)
-          setFamilyName((membership as any).families?.name || "Família")
+          if ((membership as any).families?.name) {
+            setFamilyName((membership as any).families.name)
+          }
         }
       } catch (err) {
         console.error("Bootstrap error:", err)

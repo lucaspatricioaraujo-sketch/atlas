@@ -73,18 +73,14 @@ export const CardService = {
   },
 
   async toggleFavorite(id: string, isFavorite: boolean): Promise<void> {
-    const { error } = await supabase
-      .from("cards")
-      .update({ is_favorite: isFavorite })
-      .eq("id", id)
-
-    if (error) throw error
+    // is_favorite is managed in UI state
+    return
   },
 
   async toggleActive(id: string, isActive: boolean): Promise<void> {
     const { error } = await supabase
       .from("cards")
-      .update({ is_active: isActive })
+      .update({ archived: !isActive })
       .eq("id", id)
 
     if (error) throw error

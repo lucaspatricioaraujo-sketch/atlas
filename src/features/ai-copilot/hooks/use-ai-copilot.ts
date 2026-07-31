@@ -6,8 +6,7 @@ export const COPILOT_DAILY_BRIEFING_KEY = "copilot_daily_briefing"
 export const COPILOT_RECOMMENDATIONS_KEY = "copilot_recommendations"
 
 export function useAIDailyBriefing() {
-  const { user } = useSupabase()
-  const familyId = user?.id
+  const { familyId } = useSupabase()
 
   return useQuery({
     queryKey: [COPILOT_DAILY_BRIEFING_KEY, familyId],
@@ -17,8 +16,7 @@ export function useAIDailyBriefing() {
 }
 
 export function useAIRecommendations() {
-  const { user } = useSupabase()
-  const familyId = user?.id
+  const { familyId } = useSupabase()
 
   return useQuery({
     queryKey: [COPILOT_RECOMMENDATIONS_KEY, familyId],

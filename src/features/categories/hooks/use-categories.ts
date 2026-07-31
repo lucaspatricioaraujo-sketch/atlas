@@ -3,8 +3,7 @@ import { useSupabase } from "@/providers/supabase-provider"
 import { CategoryService } from "../services"
 
 export function useCategories() {
-  const { user } = useSupabase()
-  const familyId = user?.id
+  const { familyId } = useSupabase()
 
   return useQuery({
     queryKey: ["categories", familyId],

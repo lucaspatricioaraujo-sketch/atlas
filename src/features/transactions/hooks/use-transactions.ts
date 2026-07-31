@@ -4,8 +4,7 @@ import { TransactionService } from "../services"
 import type { TransactionFormData } from "../schemas"
 
 export function useTransactions() {
-  const { user } = useSupabase()
-  const familyId = user?.id
+  const { familyId } = useSupabase()
 
   return useQuery({
     queryKey: ["transactions", familyId],
@@ -27,8 +26,7 @@ export function useTransaction(id: string) {
 
 export function useCreateTransaction() {
   const queryClient = useQueryClient()
-  const { user } = useSupabase()
-  const familyId = user?.id
+  const { user, familyId } = useSupabase()
 
   return useMutation({
     mutationFn: (data: TransactionFormData) => {

@@ -7,8 +7,7 @@ export const GOALS_QUERY_KEY = "goals"
 export const GOAL_CONTRIBUTIONS_KEY = "goal_contributions"
 
 export function useGoals() {
-  const { user } = useSupabase()
-  const familyId = user?.id
+  const { familyId } = useSupabase()
 
   return useQuery({
     queryKey: [GOALS_QUERY_KEY, familyId],
@@ -27,8 +26,7 @@ export function useGoal(id: string) {
 
 export function useCreateGoal() {
   const queryClient = useQueryClient()
-  const { user } = useSupabase()
-  const familyId = user?.id
+  const { familyId } = useSupabase()
 
   return useMutation({
     mutationFn: (data: GoalFormData) => {
@@ -43,8 +41,7 @@ export function useCreateGoal() {
 
 export function useUpdateGoal(id: string) {
   const queryClient = useQueryClient()
-  const { user } = useSupabase()
-  const familyId = user?.id
+  const { familyId } = useSupabase()
 
   return useMutation({
     mutationFn: (data: Partial<GoalFormData>) => GoalService.updateGoal(id, data),
@@ -57,8 +54,7 @@ export function useUpdateGoal(id: string) {
 
 export function useDeleteGoal() {
   const queryClient = useQueryClient()
-  const { user } = useSupabase()
-  const familyId = user?.id
+  const { familyId } = useSupabase()
 
   return useMutation({
     mutationFn: (id: string) => GoalService.deleteGoal(id),
@@ -78,8 +74,7 @@ export function useGoalContributions(goalId: string) {
 
 export function useAddContribution(goalId: string) {
   const queryClient = useQueryClient()
-  const { user } = useSupabase()
-  const familyId = user?.id
+  const { familyId } = useSupabase()
 
   return useMutation({
     mutationFn: (data: GoalContributionFormData) => GoalService.addContribution(goalId, data),
@@ -93,8 +88,7 @@ export function useAddContribution(goalId: string) {
 
 export function useRemoveContribution(goalId: string) {
   const queryClient = useQueryClient()
-  const { user } = useSupabase()
-  const familyId = user?.id
+  const { familyId } = useSupabase()
 
   return useMutation({
     mutationFn: (id: string) => GoalService.removeContribution(id),

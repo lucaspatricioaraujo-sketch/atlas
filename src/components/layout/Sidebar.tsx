@@ -24,7 +24,7 @@ const navItems = [
   { name: "Orçamentos", href: "/dashboard/budgets", icon: PiggyBank },
   { name: "Metas", href: "/dashboard/goals", icon: Target },
   { name: "Relatórios", href: "/dashboard/reports", icon: PieChart },
-  { name: "AI Assistant", href: "/dashboard/assistant", icon: Sparkles },
+  { name: "AI Assistant", href: "/dashboard/copilot", icon: Sparkles },
 ]
 
 export function Sidebar() {
