@@ -1,7 +1,7 @@
 import { createServerClient } from "@supabase/ssr"
 import { NextResponse, type NextRequest } from "next/server"
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   let supabaseResponse = NextResponse.next({
     request,
   })
@@ -33,7 +33,6 @@ export async function middleware(request: NextRequest) {
 
   // Proteger rotas que começam com /dashboard
   if (request.nextUrl.pathname.startsWith("/dashboard") && !user) {
-    // Pode redirecionar para a página de login, assumindo que seja /login ou no (auth)
     const url = request.nextUrl.clone()
     url.pathname = "/login"
     return NextResponse.redirect(url)

@@ -93,6 +93,30 @@ export const TransactionService = {
     return data as Transaction[]
   },
 
+  async getTransactionById(id: string): Promise<Transaction> {
+    const { data, error } = await supabase
+      .from("transactions")
+      .select("*")
+      .eq("id", id)
+      .single()
+
+    if (error) throw error
+    return data as Transaction
+  },
+
+  async updateTransaction(id: string, payload: Partial<TransactionFormData>): Promise<void> {
+    const { destination_account_id, installments, ...dbPayload } = payload
+    
+    // Simplification for v1: updating a transfer or installment is limited, 
+    // we only update the fields of the specific transaction entry.
+    const { error } = await supabase
+      .from("transactions")
+      .update(dbPayload)
+      .eq("id", id)
+
+    if (error) throw error
+  },
+
   async deleteTransaction(id: string): Promise<void> {
     const { error } = await supabase
       .from("transactions")

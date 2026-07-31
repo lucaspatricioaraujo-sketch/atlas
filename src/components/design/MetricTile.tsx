@@ -8,8 +8,9 @@ export interface MetricTileProps extends Omit<React.HTMLAttributes<HTMLDivElemen
   value: string
   trend?: "up" | "down" | "neutral"
   trendValue?: string
-  trendLabel?: string
+  trendLabel?: React.ReactNode
   icon?: React.ReactNode
+  valueClassName?: string
 }
 
 export function MetricTile({
@@ -19,6 +20,7 @@ export function MetricTile({
   trendValue,
   trendLabel,
   icon,
+  valueClassName,
   className,
   ...props
 }: MetricTileProps) {
@@ -30,7 +32,7 @@ export function MetricTile({
       </div>
       
       <div>
-        <div className="text-3xl font-bold tracking-tight text-foreground">
+        <div className={cn("text-3xl font-bold tracking-tight text-foreground", valueClassName)}>
           {value}
         </div>
         

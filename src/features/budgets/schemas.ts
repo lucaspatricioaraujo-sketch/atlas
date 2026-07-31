@@ -7,7 +7,7 @@ export const budgetItemSchema = z.object({
 
 export const budgetSchema = z.object({
   name: z.string().min(1, "O nome do orçamento é obrigatório").max(100),
-  period: z.enum(["MONTHLY", "YEARLY"]).default("MONTHLY"),
+  period: z.enum(["MONTHLY", "YEARLY"]),
   start_date: z.string(), // Format YYYY-MM-DD
   end_date: z.string(),   // Format YYYY-MM-DD
   total_limit: z.number().positive("O limite total deve ser maior que zero"),
