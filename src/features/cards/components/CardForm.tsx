@@ -68,8 +68,8 @@ export function CardForm({ initialData }: CardFormProps) {
         toast.success(isEditing ? "Cartão atualizado!" : "Cartão criado com sucesso!")
         router.push("/dashboard/cards")
       },
-      onError: (err) => {
-        toast.error("Erro ao salvar cartão.")
+      onError: (err: any) => {
+        toast.error(err?.message || "Erro ao salvar cartão.")
         console.error(err)
       }
     })

@@ -66,8 +66,8 @@ export function AccountForm({ initialData }: AccountFormProps) {
         toast.success(isEditing ? "Conta atualizada!" : "Conta criada com sucesso!")
         router.push("/dashboard/accounts")
       },
-      onError: (err) => {
-        toast.error("Erro ao salvar conta.")
+      onError: (err: any) => {
+        toast.error(err?.message || "Erro ao salvar conta.")
         console.error(err)
       }
     })
@@ -129,8 +129,6 @@ export function AccountForm({ initialData }: AccountFormProps) {
                         <SelectItem value="SAVINGS">Conta Poupança</SelectItem>
                         <SelectItem value="INVESTMENT">Investimento</SelectItem>
                         <SelectItem value="CASH">Dinheiro Físico</SelectItem>
-                        <SelectItem value="DIGITAL_WALLET">Carteira Digital</SelectItem>
-                        <SelectItem value="OTHER">Outro</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />

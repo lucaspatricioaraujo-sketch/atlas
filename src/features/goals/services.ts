@@ -26,6 +26,7 @@ export const GoalService = {
   },
 
   async createGoal(familyId: string, payload: GoalFormData): Promise<Goal> {
+    if (!familyId) throw new Error("Família não selecionada ou não autenticada.")
     const { data, error } = await supabase
       .from("goals")
       .insert([{ family_id: familyId, ...payload }])

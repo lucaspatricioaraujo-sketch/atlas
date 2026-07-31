@@ -17,6 +17,7 @@ import {
 import { goalSchema, type GoalFormData } from "../schemas"
 import { useCreateGoal, useUpdateGoal } from "../hooks/use-goals"
 import type { Goal } from "../types"
+import { toast } from "sonner"
 
 interface GoalFormProps {
   initialData?: Goal
@@ -58,8 +59,9 @@ export function GoalForm({ initialData }: GoalFormProps) {
         await createMutation.mutateAsync(values)
       }
       router.push("/dashboard/goals")
-    } catch (err) {
+    } catch (err: any) {
       console.error(err)
+      toast.error(err?.message || "Erro ao salvar meta")
     }
   }
 

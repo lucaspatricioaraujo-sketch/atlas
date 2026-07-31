@@ -27,13 +27,23 @@ export const AccountService = {
   },
 
   async createAccount(familyId: string, payload: AccountFormData): Promise<Account> {
+    if (!familyId) throw new Error("Família não selecionada ou não autenticada.")
+
+    const {
+      is_active,
+      is_favorite,
+      sync_status,
+      manual_account,
+      ...accountData
+    } = payload as any
+
     const { data, error } = await supabase
       .from("accounts")
       .insert([
         {
           family_id: familyId,
-          ...payload,
-          balance: payload.initial_balance // Balance starts as initial_balance
+          ...accountData,
+          balance: payload.initial_balance ?? 0,
         },
       ])
       .select()

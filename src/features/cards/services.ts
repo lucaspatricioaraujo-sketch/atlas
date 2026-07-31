@@ -27,12 +27,24 @@ export const CardService = {
   },
 
   async createCard(familyId: string, payload: CardFormData): Promise<Card> {
+    if (!familyId) throw new Error("Família não selecionada ou não autenticada.")
+
+    const {
+      institution,
+      available_limit,
+      is_active,
+      is_favorite,
+      sync_status,
+      manual_card,
+      ...cardData
+    } = payload as any
+
     const { data, error } = await supabase
       .from("cards")
       .insert([
         {
           family_id: familyId,
-          ...payload,
+          ...cardData,
         },
       ])
       .select()

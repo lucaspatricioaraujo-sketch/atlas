@@ -26,6 +26,7 @@ export const BudgetService = {
   },
 
   async createBudget(familyId: string, payload: BudgetFormData): Promise<Budget> {
+    if (!familyId) throw new Error("Família não selecionada ou não autenticada.")
     const { items, ...budgetData } = payload
 
     // 1. Create Budget

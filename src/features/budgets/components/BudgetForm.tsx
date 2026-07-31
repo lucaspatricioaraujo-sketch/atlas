@@ -24,6 +24,7 @@ import {
 import { budgetSchema, type BudgetFormData } from "../schemas"
 import { useCreateBudget } from "../hooks/use-budgets"
 import { useCategories } from "@/features/categories/hooks/use-categories"
+import { toast } from "sonner"
 
 export function BudgetForm() {
   const router = useRouter()
@@ -52,8 +53,9 @@ export function BudgetForm() {
     try {
       await createMutation.mutateAsync(values)
       router.push("/dashboard/budgets")
-    } catch (err) {
+    } catch (err: any) {
       console.error(err)
+      toast.error(err?.message || "Erro ao salvar orçamento")
     }
   }
 
