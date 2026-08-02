@@ -17,7 +17,6 @@ import {
 
 import { AnalyticsService } from "@/features/analytics/services"
 import { formatCurrency } from "@/utils/format"
-import { supabase } from "@/services/auth.service"
 import { useSupabase } from "@/providers/supabase-provider"
 
 import type { DashboardSummaryDTO, UpcomingBillDTO, ExpenseByCategoryDTO, CashFlowChartDTO } from "@/features/analytics/types"
@@ -42,17 +41,10 @@ function getMonthRange() {
 
 export default function DashboardPage() {
   const { startDate, endDate } = getMonthRange()
-  const { familyId: contextFamilyId, user } = useSupabase()
+  // Use familyId and supabase directly from context — single source of truth
+  const { familyId, supabase } = useSupabase()
 
-  // State Management
-  const [familyId, setFamilyId] = useState<string | null>(contextFamilyId)
   const [familyName, setFamilyName] = useState("Família")
-
-  useEffect(() => {
-    if (contextFamilyId) {
-      setFamilyId(contextFamilyId)
-    }
-  }, [contextFamilyId])
 
   // Data States
   const [summary, setSummary] = useState<DashboardSummaryDTO | null>(null)
@@ -80,34 +72,38 @@ export default function DashboardPage() {
   const [errorBudgets, setErrorBudgets] = useState(false)
   const [errorTx, setErrorTx] = useState(false)
 
-  // ── Bootstrap: find user's family ──
+  // ── Load family name when familyId is available ──
   useEffect(() => {
-    async function bootstrap() {
-      if (!user) return
-      try {
-        const { data: membership } = await supabase
-          .from("family_members")
-          .select("family_id, families(name)")
-          .eq("user_id", user.id)
-          .limit(1)
-          .maybeSingle()
-
-        if (membership) {
-          setFamilyId(membership.family_id)
-          if ((membership as any).families?.name) {
-            setFamilyName((membership as any).families.name)
-          }
-        }
-      } catch (err) {
-        console.error("Bootstrap error:", err)
-      }
-    }
-    bootstrap()
-  }, [])
+    if (!familyId) return
+    supabase
+      .from("families")
+      .select("name")
+      .eq("id", familyId)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (data?.name) setFamilyName(data.name)
+      })
+  }, [familyId, supabase])
 
   // ── Fetch analytics data when familyId is available ──
   useEffect(() => {
     if (!familyId) return
+
+    // Reset loading/error states on new familyId
+    setLoadingSummary(true)
+    setLoadingCashFlow(true)
+    setLoadingExpenses(true)
+    setLoadingBills(true)
+    setLoadingGoals(true)
+    setLoadingBudgets(true)
+    setLoadingTx(true)
+    setErrorSummary(false)
+    setErrorCashFlow(false)
+    setErrorExpenses(false)
+    setErrorBills(false)
+    setErrorGoals(false)
+    setErrorBudgets(false)
+    setErrorTx(false)
 
     // 1. Dashboard Summary (KPIs)
     AnalyticsService.getDashboardSummary(familyId, startDate, endDate)
@@ -133,7 +129,7 @@ export default function DashboardPage() {
       .catch(() => setErrorBills(true))
       .finally(() => setLoadingBills(false))
 
-    // 5. Goals Progress (direct Supabase query)
+    // 5. Goals Progress
     ;(async () => {
       try {
         const { data, error } = await supabase
@@ -148,7 +144,7 @@ export default function DashboardPage() {
       finally { setLoadingGoals(false) }
     })()
 
-    // 6. Budget Overview (direct query)
+    // 6. Budget Overview
     ;(async () => {
       try {
         const { data: budgetData, error } = await supabase
@@ -159,7 +155,6 @@ export default function DashboardPage() {
           .lte("start_date", endDate)
           .limit(5)
         if (error) { setErrorBudgets(true); return }
-        // For now, spent is set to 0. A dedicated RPC would provide spent amounts.
         setBudgets((budgetData || []).map((b) => ({ ...b, spent: 0 })))
       } catch { setErrorBudgets(true) }
       finally { setLoadingBudgets(false) }
@@ -184,7 +179,7 @@ export default function DashboardPage() {
       finally { setLoadingTx(false) }
     })()
 
-  }, [familyId, startDate, endDate])
+  }, [familyId, startDate, endDate, supabase])
 
   // ──────────────────────────────────────────
   // Render

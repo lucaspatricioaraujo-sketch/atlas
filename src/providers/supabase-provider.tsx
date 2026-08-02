@@ -15,6 +15,7 @@ type SupabaseContextType = {
 const SupabaseContext = createContext<SupabaseContextType | undefined>(undefined)
 
 // Singleton client — one instance shared across provider and services
+// This guarantees that cookies/session state are never split across two clients
 let _supabaseClient: SupabaseClient | null = null
 function getSupabaseClient(): SupabaseClient {
   if (!_supabaseClient) {
@@ -32,7 +33,7 @@ export function SupabaseProvider({ children }: { children: React.ReactNode }) {
   const [familyId, setFamilyId] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
-  const fetchFamilyId = useCallback(async (userId: string) => {
+  const fetchFamilyId = useCallback(async (userId: string): Promise<string | null> => {
     try {
       const { data, error } = await supabase
         .from("family_members")
@@ -44,23 +45,35 @@ export function SupabaseProvider({ children }: { children: React.ReactNode }) {
       if (error) {
         console.error("[SupabaseProvider] Error fetching family_id:", error.message)
         setFamilyId(null)
-        return
+        return null
       }
 
       if (data?.family_id) {
         setFamilyId(data.family_id)
+        return data.family_id
       } else {
-        // User is authenticated but has no family yet — do NOT fallback to userId
-        // This would silently corrupt the family_id used in all RLS-protected queries
         setFamilyId(null)
+        return null
       }
     } catch (err) {
       console.error("[SupabaseProvider] Unexpected error fetching family_id:", err)
       setFamilyId(null)
+      return null
     }
   }, [supabase])
 
   useEffect(() => {
+    // 1. Restore existing session immediately on mount (doesn't wait for auth event)
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      const currentUser = session?.user ?? null
+      setUser(currentUser)
+      if (currentUser) {
+        await fetchFamilyId(currentUser.id)
+      }
+      setIsLoading(false)
+    })
+
+    // 2. Subscribe to future auth state changes (login, logout, token refresh)
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
