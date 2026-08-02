@@ -111,15 +111,25 @@ ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.families ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.family_members ENABLE ROW LEVEL SECURITY;
 
+-- 6a. GRANT permissions to Supabase roles
+-- (Without these GRANTs, RLS policies are meaningless — PostgreSQL rejects at the GRANT layer first)
+GRANT USAGE ON SCHEMA public TO anon, authenticated;
+
+GRANT SELECT, INSERT, UPDATE ON public.profiles TO authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.families TO authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.family_members TO authenticated;
+
 -- Profiles Policies
 DROP POLICY IF EXISTS "Users can view their own profile" ON public.profiles;
 CREATE POLICY "Users can view their own profile" 
-ON public.profiles FOR SELECT 
+ON public.profiles FOR SELECT
+TO authenticated
 USING (auth.uid() = id);
 
 DROP POLICY IF EXISTS "Users can view family members profiles" ON public.profiles;
 CREATE POLICY "Users can view family members profiles" 
-ON public.profiles FOR SELECT 
+ON public.profiles FOR SELECT
+TO authenticated
 USING (
   EXISTS (
     SELECT 1 FROM public.family_members fm1
@@ -130,49 +140,58 @@ USING (
 
 DROP POLICY IF EXISTS "Users can update own profile" ON public.profiles;
 CREATE POLICY "Users can update own profile" 
-ON public.profiles FOR UPDATE 
+ON public.profiles FOR UPDATE
+TO authenticated
 USING (auth.uid() = id);
 
 DROP POLICY IF EXISTS "Users can insert own profile" ON public.profiles;
 CREATE POLICY "Users can insert own profile"
 ON public.profiles FOR INSERT
+TO authenticated
 WITH CHECK (auth.uid() = id);
 
 -- Families Policies
 DROP POLICY IF EXISTS "Users can view families they belong to" ON public.families;
 CREATE POLICY "Users can view families they belong to" 
-ON public.families FOR SELECT 
+ON public.families FOR SELECT
+TO authenticated
 USING (public.has_family_access(id));
 
 DROP POLICY IF EXISTS "Admins can update families" ON public.families;
 CREATE POLICY "Admins can update families" 
-ON public.families FOR UPDATE 
+ON public.families FOR UPDATE
+TO authenticated
 USING (public.is_family_admin(id));
 
 DROP POLICY IF EXISTS "Users can create families" ON public.families;
 CREATE POLICY "Users can create families" 
-ON public.families FOR INSERT 
+ON public.families FOR INSERT
+TO authenticated
 WITH CHECK (true);
 
 -- Family Members Policies
 DROP POLICY IF EXISTS "Users can view members of their families" ON public.family_members;
 CREATE POLICY "Users can view members of their families" 
-ON public.family_members FOR SELECT 
+ON public.family_members FOR SELECT
+TO authenticated
 USING (public.has_family_access(family_id));
 
 DROP POLICY IF EXISTS "Admins can insert members" ON public.family_members;
 CREATE POLICY "Admins can insert members" 
-ON public.family_members FOR INSERT 
+ON public.family_members FOR INSERT
+TO authenticated
 WITH CHECK (public.is_family_admin(family_id) OR user_id = auth.uid());
 
 DROP POLICY IF EXISTS "Admins can update members" ON public.family_members;
 CREATE POLICY "Admins can update members" 
-ON public.family_members FOR UPDATE 
+ON public.family_members FOR UPDATE
+TO authenticated
 USING (public.is_family_admin(family_id));
 
 DROP POLICY IF EXISTS "Admins or self can delete members" ON public.family_members;
 CREATE POLICY "Admins or self can delete members" 
-ON public.family_members FOR DELETE 
+ON public.family_members FOR DELETE
+TO authenticated
 USING (public.is_family_admin(family_id) OR user_id = auth.uid());
 
 -- 7. Automated Profile Creation Trigger
@@ -191,7 +210,13 @@ CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
 
--- 8. Performance Indexes
+-- 8. Backfill profiles for users created before trigger existed
+INSERT INTO public.profiles (id)
+SELECT id FROM auth.users
+WHERE id NOT IN (SELECT id FROM public.profiles)
+ON CONFLICT (id) DO NOTHING;
+
+-- 9. Performance Indexes
 CREATE INDEX IF NOT EXISTS idx_family_members_family_id ON public.family_members(family_id);
 CREATE INDEX IF NOT EXISTS idx_family_members_user_id ON public.family_members(user_id);
 
@@ -818,9 +843,30 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 
 -- =============================================================================
+-- GRANTS FINAIS — PERMISSÕES PARA TODAS AS TABELAS FINANCEIRAS
+-- =============================================================================
+
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.accounts TO authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.cards TO authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.categories TO authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.transactions TO authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.budgets TO authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.budget_items TO authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.goals TO authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.goal_contributions TO authenticated;
+
+-- GRANTs para funções RPC (necessário para chamadas via PostgREST)
+GRANT EXECUTE ON FUNCTION public.has_family_access(UUID) TO authenticated, anon;
+GRANT EXECUTE ON FUNCTION public.is_family_admin(UUID) TO authenticated, anon;
+GRANT EXECUTE ON FUNCTION public.get_dashboard_summary(UUID, DATE, DATE) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.get_upcoming_bills(UUID, INT) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.get_expenses_by_category(UUID, DATE, DATE) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.get_cash_flow_chart(UUID, DATE, DATE) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.get_ai_financial_summary(UUID, DATE, DATE) TO authenticated;
+
+
+-- =============================================================================
 -- VERIFICAÇÃO FINAL
--- Execute esta query para confirmar que todas as tabelas foram criadas:
--- SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' ORDER BY table_name;
 -- =============================================================================
 SELECT 
   table_name,
